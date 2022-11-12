@@ -16,11 +16,6 @@ public class PlayerManager : MonoBehaviour
 
     //  プレイヤーの描画コンポーネント
     private PlayerView _playerView = null;
-    //  １回の移動距離
-    private static readonly float _walkDistance = 32;
-    //  移動中かどうかの判断
-    private bool _isWalking = false;
-    public  bool IsWalking => _isWalking;
     
     // Start is called before the first frame update
     void Start()
@@ -47,22 +42,11 @@ public class PlayerManager : MonoBehaviour
         {
             _playerView.SetAnimation(PlayerAnimState.Back);
         }
-    }
-
-    /// <summary>
-    /// 移動処理
-    /// </summary>
-    public void WalingStart()
-    {
-        //  すでに移動中ならば何もしない
-        if(_isWalking) return;
-        _isWalking = true;
-        //  移動処理を呼び出す
-        WalingTask().Forget();
-    }
-
-    private async UniTask WalingTask()
-    {
-        await UniTask.Yield();
+        else if (false == _playerView.IsWalking)
+        {
+            _playerView.SetAnimation(PlayerAnimState.Idle);
+        }
+        //  移動処理
+        _playerView.WalingStart();
     }
 }
