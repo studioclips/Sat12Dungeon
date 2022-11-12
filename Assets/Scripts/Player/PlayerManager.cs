@@ -16,11 +16,17 @@ public class PlayerManager : MonoBehaviour
 
     //  プレイヤーの描画コンポーネント
     private PlayerView _playerView = null;
+
+    //  マップ上の位置
+    private Vector3Int _plyerPos = new Vector3Int(1, 1, 0);
+    //  マップの１ブロックのサイズ
+    private static readonly int _blockSize = 32;
     
     // Start is called before the first frame update
     void Start()
     {
-        _playerView = GetComponent<PlayerView>();
+        _playerView                         = GetComponent<PlayerView>();
+        _playerView.transform.localPosition = _plyerPos * _blockSize;
     }
 
     // Update is called once per frame
