@@ -31,11 +31,22 @@ public class PlayerView : MonoBehaviour
     [SerializeField]
     private float _walkStep = 0.1f;
 
+    //  移動終了のコールバック関数登録場所
+    // private System.Action _walkEndCallback = null;
+
     // Start is called before the first frame update
     void Awake()
     {
         _animator = GetComponent<Animator>();
     }
+
+    /// <summary>
+    /// 移動終了のコールバック関数登録用の関数
+    /// </summary>
+    // public void SetupWalkEndCallback(System.Action walkEndCallback)
+    // {
+    //     _walkEndCallback = walkEndCallback;
+    // }
 
     /// <summary>
     /// 指定のアニメーションを呼び出す
@@ -90,5 +101,8 @@ public class PlayerView : MonoBehaviour
         }
         //  移動終了
         _isWalking = false;
+        // if (null != _walkEndCallback)
+        //     _walkEndCallback();
+        //  _walkEndCallback.Invoke();
     }
 }

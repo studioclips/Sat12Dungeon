@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -26,14 +25,6 @@ public class MapManager : MonoBehaviour
     //  最初に読み込むファイル名
     private string _firstMapFileName = "Data/originalMap";
     
-    private static readonly int   _mapWidth  = 20;                                             //  マップのX方向のチップ数
-    private static readonly int   _mapHeight = 20;                                             //  マップのY方向のチップ数
-    private static readonly int   _chipSize  = 32;                                             //  チップの大きさ
-    private readonly        float _startXPos = -_chipSize * _mapWidth / 2f + _chipSize / 2.0f; //  チップの開始X座標
-    private readonly        float _startYpos = _chipSize * _mapHeight / 2f - _chipSize / 2.0f; //  チップの開始Y座標
-    //  コンパクトにまとめるとこんな感じ
-    // private readonly        float _startXPos = -_chipSize * (_mapWidth - 1) / 2f; //  チップの開始X座標
-    // private readonly        float _startYpos = _chipSize * (_mapHeight - 1) / 2f; //  チップの開始Y座標
     
     // Start is called before the first frame update
     void Start()
@@ -111,14 +102,17 @@ public class MapManager : MonoBehaviour
     private void InitalizeMap()
     {
         
-        foreach (int y in Enumerable.Range(0, _mapHeight))
+        foreach (int y in Enumerable.Range(0, CommonParam.MapHeight))
         {
-            foreach (int x in Enumerable.Range(0, _mapWidth))
+            foreach (int x in Enumerable.Range(0, CommonParam.MapWidth))
             {
                 //  マップチップをプレハブから生成する
                 GameObject mapChip = Instantiate(_mapPrefab, _mapParent);
                 //  マップチップの初期座標を設定する
-                mapChip.transform.localPosition = new Vector3(_startXPos + x * _chipSize, _startYpos - y * _chipSize, 0);
+                mapChip.transform.localPosition = 
+                    new Vector3(CommonParam.StartXPos + x * CommonParam.ChipSize,
+                                CommonParam.StartYpos - y * CommonParam.ChipSize,
+                                0);
                 int mData = GetMapData(x, y);
                 int sData = GetMapStat(x, y);
                 //  マップチップイメージ画像を設定する
@@ -132,6 +126,39 @@ public class MapManager : MonoBehaviour
 
     }
 
+#endregion
+
+#region マップ移動関連
+
+    private List<CommonParam.MapChipType> _hitChipTypes = new List<CommonParam.MapChipType>()
+    {
+        CommonParam.MapChipType.Wall,
+        CommonParam.MapChipType.Door,
+        CommonParam.MapChipType.OpenTBox,
+        CommonParam.MapChipType.CloseTBox
+    };
+    /// <summary>
+    /// 指定された座標に移動可能かどうかのチェック
+    /// </summary>
+    /// <param name="pos">指定された座標</param>
+    /// <returns>移動可能かどうかの判断</returns>
+    public bool IsMapMoveEnable(Vector3Int pos)
+    {
+        int mData = GetMapData(pos.x, pos.y);
+        int mStat = GetMapStat(pos.x, pos.y);
+        //  壁であり、尚且つ通り抜けられる場合は移動可能
+        if ((int)CommonParam.MapChipType.Wall == mData && 1 == mStat) return true;
+        //  hitchip を順番に取り出して value に入れる
+        foreach (int value in _hitChipTypes)
+        {
+            //  value がマップデータと等しければそこは移動できないので false を返す
+            if (value == mData)
+                return false;
+        }
+        //  どのパターンにも引っ掛からなかったら移動可能なので true を返す
+        return true;
+    }
+    
 #endregion
     
 }
