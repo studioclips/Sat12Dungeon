@@ -7,11 +7,15 @@ public class PlayerManager : MonoBehaviour
     //  アニメーションを呼び出すときに使用する型
     public enum PlayerAnimState
     {
-        Idle  = 0,
-        Front = 1,
-        Right = 2,
-        Left  = 3,
-        Back  = 4
+        FrontIdle = 0,
+        LeftIdle = 1,
+        RightIdle = 2,
+        BackIdle = 3,
+        IdleEnd = 4,
+        FrontWalk = IdleEnd,
+        LeftWalk = 5,
+        RightWalk = 6,
+        BackWalk = 7
     }
 
     //  プレイヤーの描画コンポーネント
@@ -32,8 +36,8 @@ public class PlayerManager : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        _playerStartPos                     = new Vector3(CommonParam.StartXPos, CommonParam.StartYpos, 0);
-        _playerView                         = GetComponent<PlayerView>();
+        _playerStartPos = new Vector3(CommonParam.StartXPos, CommonParam.StartYpos, 0);
+        _playerView = GetComponent<PlayerView>();
         _playerView.transform.localPosition = _playerStartPos + (Vector3)(_plyerPos * _blockSize * _adjustPos);
     }
 
@@ -45,7 +49,7 @@ public class PlayerManager : MonoBehaviour
     // {
     //     _playerView.SetupWalkEndCallback(walkEndCallback);
     // }
-    
+
     /// <summary>
     /// 移動可能かどうかを取得する関数
     /// </summary>
@@ -61,30 +65,58 @@ public class PlayerManager : MonoBehaviour
         //  関数が登録されていなければ何もしない
         if (null == _isMoveEnableFunc) return;
         //  移動中はキーを受け付けない
-        if(_playerView.IsWalking) return;
-        if (Input.GetKey(KeyCode.DownArrow) && _isMoveEnableFunc(_plyerPos + Vector3Int.up))
+        if (_playerView.IsWalking) return;
+        if (Input.GetKey(KeyCode.DownArrow))
         {
-            _playerView.SetAnimation(PlayerAnimState.Front);
-            _plyerPos += Vector3Int.up;
+            if (_isMoveEnableFunc(_plyerPos + Vector3Int.up))
+            {
+                _playerView.SetAnimation(PlayerAnimState.FrontWalk);
+                _plyerPos += Vector3Int.up;
+            }
+            else
+            {
+                _playerView.SetAnimation(PlayerAnimState.FrontIdle);
+            }
         }
-        else if (Input.GetKey(KeyCode.LeftArrow) && _isMoveEnableFunc(_plyerPos + Vector3Int.left))
+        else if (Input.GetKey(KeyCode.LeftArrow))
         {
-            _playerView.SetAnimation(PlayerAnimState.Left);
-            _plyerPos += Vector3Int.left;
+            if (_isMoveEnableFunc(_plyerPos + Vector3Int.left))
+            {
+                _playerView.SetAnimation(PlayerAnimState.LeftWalk);
+                _plyerPos += Vector3Int.left;
+            }
+            else
+            {
+                _playerView.SetAnimation(PlayerAnimState.LeftIdle);
+            }
         }
-        else if (Input.GetKey(KeyCode.RightArrow) && _isMoveEnableFunc(_plyerPos + Vector3Int.right))
+        else if (Input.GetKey(KeyCode.RightArrow))
         {
-            _playerView.SetAnimation(PlayerAnimState.Right);
-            _plyerPos += Vector3Int.right;
+            if (_isMoveEnableFunc(_plyerPos + Vector3Int.right))
+            {
+                _playerView.SetAnimation(PlayerAnimState.RightWalk);
+                _plyerPos += Vector3Int.right;
+            }
+            else
+            {
+                _playerView.SetAnimation(PlayerAnimState.RightIdle);
+            }
         }
-        else if (Input.GetKey(KeyCode.UpArrow) && _isMoveEnableFunc(_plyerPos + Vector3Int.down))
+        else if (Input.GetKey(KeyCode.UpArrow))
         {
-            _playerView.SetAnimation(PlayerAnimState.Back);
-            _plyerPos += Vector3Int.down;
+            if (_isMoveEnableFunc(_plyerPos + Vector3Int.down))
+            {
+                _playerView.SetAnimation(PlayerAnimState.BackWalk);
+                _plyerPos += Vector3Int.down;
+            }
+            else
+            {
+                _playerView.SetAnimation(PlayerAnimState.BackIdle);
+            }
         }
         else if (false == _playerView.IsWalking)
         {
-            _playerView.SetAnimation(PlayerAnimState.Idle);
+            _playerView.SetIdle();
         }
         //  移動処理
         _playerView.WalingStart();

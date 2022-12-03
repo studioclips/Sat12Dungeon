@@ -9,10 +9,17 @@ public class PlayerView : MonoBehaviour
     //  アニメーター
     private Animator _animator = null;
 
-    private static readonly int PlayerAnimState = Animator.StringToHash("PlayerAnimState");
+    private static readonly int PlayerFrontWalkAnimState = Animator.StringToHash("FrontWalk");
+    private static readonly int PlayerFrontIdleAnimState = Animator.StringToHash("FrontIdle");
+    private static readonly int PlayerBackWalkAnimState = Animator.StringToHash("BackWalk");
+    private static readonly int PlayerBackIdleAnimState = Animator.StringToHash("BackIdle");
+    private static readonly int PlayerLeftWalkAnimState = Animator.StringToHash("LeftWalk");
+    private static readonly int PlayerLeftIdleAnimState = Animator.StringToHash("LeftIdle");
+    private static readonly int PlayerRightWalkAnimState = Animator.StringToHash("RightWalk");
+    private static readonly int PlayerRightIdleAnimState = Animator.StringToHash("RightIdle");
 
     //  現在のアニメーションステータス
-    private PlayerManager.PlayerAnimState _playerAnimState = PlayerManager.PlayerAnimState.Idle;
+    private PlayerManager.PlayerAnimState _playerAnimState = PlayerManager.PlayerAnimState.FrontIdle;
     //  １回の移動距離
     private static readonly float _walkDistance = 32;
     //  移動中かどうかの判断
@@ -21,11 +28,23 @@ public class PlayerView : MonoBehaviour
     private Dictionary<PlayerManager.PlayerAnimState, Vector3> _addTable = 
         new Dictionary<PlayerManager.PlayerAnimState, Vector3>()
     {
-        {PlayerManager.PlayerAnimState.Front , Vector3.down},
-        {PlayerManager.PlayerAnimState.Right , Vector3.right},
-        {PlayerManager.PlayerAnimState.Left , Vector3.left},
-        {PlayerManager.PlayerAnimState.Back , Vector3.up},
+        {PlayerManager.PlayerAnimState.FrontWalk , Vector3.down},
+        {PlayerManager.PlayerAnimState.LeftWalk , Vector3.left},
+        {PlayerManager.PlayerAnimState.RightWalk , Vector3.right},
+        {PlayerManager.PlayerAnimState.BackWalk , Vector3.up},
     };
+    private Dictionary<PlayerManager.PlayerAnimState, int> _animHashTable =
+        new Dictionary<PlayerManager.PlayerAnimState, int>()
+        {
+            {PlayerManager.PlayerAnimState.FrontIdle, PlayerFrontIdleAnimState},
+            {PlayerManager.PlayerAnimState.LeftIdle,  PlayerLeftIdleAnimState},
+            {PlayerManager.PlayerAnimState.RightIdle, PlayerRightIdleAnimState},
+            {PlayerManager.PlayerAnimState.BackIdle,  PlayerBackIdleAnimState},
+            {PlayerManager.PlayerAnimState.FrontWalk, PlayerFrontWalkAnimState},
+            {PlayerManager.PlayerAnimState.LeftWalk,  PlayerLeftWalkAnimState},
+            {PlayerManager.PlayerAnimState.RightWalk, PlayerRightWalkAnimState},
+            {PlayerManager.PlayerAnimState.BackWalk,  PlayerBackWalkAnimState},
+        };
 
     //  １フレームでの移動距離（ドット数）
     [SerializeField]
@@ -59,7 +78,21 @@ public class PlayerView : MonoBehaviour
         //  アニメーションステータスの変更
         _playerAnimState = playerAnimState;
         //  アニメーションリクエスト
-        _animator.SetInteger(PlayerAnimState, (int)playerAnimState);
+        _animator.SetTrigger(_animHashTable[playerAnimState]);
+    }
+
+    /// <summary>
+    /// 移動状態から通常状態へ変更する
+    /// </summary>
+    public void SetIdle()
+    {
+        //  現在の状態がアイドリングのどれかだった場合は何もしない
+        if (_playerAnimState < PlayerManager.PlayerAnimState.IdleEnd)
+            return;
+        //  移動ステータスからアイドリングステータスへの変更
+        _playerAnimState = (PlayerManager.PlayerAnimState)((int)_playerAnimState - 4);
+        //  アニメーションリクエスト
+        _animator.SetTrigger(_animHashTable[_playerAnimState]);
     }
     
     /// <summary>
@@ -68,7 +101,7 @@ public class PlayerView : MonoBehaviour
     public void WalingStart()
     {
         //  すでに移動中あるいはアイドリング状態ならば何もしない
-        if(_isWalking || PlayerManager.PlayerAnimState.Idle == _playerAnimState) return;
+        if(_isWalking || PlayerManager.PlayerAnimState.IdleEnd > _playerAnimState) return;
         _isWalking = true;
         //  移動処理を呼び出す
         WalingTask(this.GetCancellationTokenOnDestroy()).Forget();
