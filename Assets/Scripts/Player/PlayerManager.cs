@@ -23,6 +23,7 @@ public class PlayerManager : MonoBehaviour
 
     //  マップ上の位置
     private Vector3Int _plyerPos = new Vector3Int(1, 1, 0);
+    public Vector3Int PlayerPos => _plyerPos;
     //  マップの１ブロックのサイズ
     private static readonly int _blockSize = 32;
     //  表示開始の先頭座標
@@ -32,6 +33,9 @@ public class PlayerManager : MonoBehaviour
 
     //  移動可能かどうかの判断を行う関数の登録
     private System.Func<Vector3Int, bool> _isMoveEnableFunc = null;
+
+    //  プレイヤーの移動状態を取得
+    public bool IsWalking => _playerView.IsWalking;
 
     // Start is called before the first frame update
     void Start()

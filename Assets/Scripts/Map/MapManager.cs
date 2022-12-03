@@ -24,6 +24,9 @@ public class MapManager : MonoBehaviour
     
     //  最初に読み込むファイル名
     private string _firstMapFileName = "Data/originalMap";
+
+    //  生成したマップチップの情報を保存する場所
+    private List<MapImageView> _mapImageLists = new List<MapImageView>();
     
     
     // Start is called before the first frame update
@@ -57,8 +60,26 @@ public class MapManager : MonoBehaviour
         //  Y のラインデータの個数分繰り返し対応する
         foreach (string mapLine in mapLines)
         {
+            //  １行のデータに "floor" の文字があれば階層を表示している行なので特別な処理はしないで階層の値を取得する
+            if(mapLine.IndexOf("floor") >= 0)
+            {
+                //  「,」で文字列を区切って配列にする
+                string[] lines = mapLine.Split(',');
+                //  文字列の中から "floor" を削除すると階層の数値の文字が残るはず
+                var floorCount = lines[0].Replace("floor", "");
+                //  文字列を数値に変換してみる。うまくいくと true が返ってきて out int num に変換された数値が入る
+                if(int.TryParse(floorCount, out int num))
+                    _mapFloor = num;
+                else
+                    _mapFloor++;
+                //  Y座標をリセットする
+                y = 0;
+                continue;
+            }
             //  「,」で文字列を区切って配列にする
             string[] mapXDatas = mapLine.Split(',');
+            if(mapXDatas.Length < 20)
+                continue;
             //  X のインデックス初期化
             int      x         = 0;
             //  x データの個数分繰り返し対応する
@@ -72,6 +93,8 @@ public class MapManager : MonoBehaviour
             //  Y のインデックスを１つ進める
             y++;
         }
+        //  １階にいる状態に戻す
+        _mapFloor = 0;
     }
 
     /// <summary>
@@ -116,14 +139,28 @@ public class MapManager : MonoBehaviour
                 int mData = GetMapData(x, y);
                 int sData = GetMapStat(x, y);
                 //  マップチップイメージ画像を設定する
-                mapChip.GetComponent<MapImageView>().SetMapImage(_mapSpriteLists[mData]);
+                var mapImageView = mapChip.GetComponent<MapImageView>();
+                mapImageView.SetMapImage(_mapSpriteLists[mData]);
+                _mapImageLists.Add(mapImageView);
             }
         }
     }
 
+    /// <summary>
+    /// マップの再描画
+    /// </summary>
     private void ReDrawMap()
     {
-
+        foreach (int y in Enumerable.Range(0, CommonParam.MapHeight))
+        {
+            foreach (int x in Enumerable.Range(0, CommonParam.MapWidth))
+            {
+                var mData = GetMapData(x, y);
+                var mStat = GetMapStat(x, y);
+                var index = y * CommonParam.MapWidth + x;
+                _mapImageLists[index].SetMapImage(_mapSpriteLists[mData]);
+            }
+        }
     }
 
 #endregion
@@ -157,6 +194,37 @@ public class MapManager : MonoBehaviour
         }
         //  どのパターンにも引っ掛からなかったら移動可能なので true を返す
         return true;
+    }
+
+    /// <summary>
+    /// 階段を登ったかチェックして登っていたらマップ書き換え
+    /// </summary>
+    /// <param name="pos">現在の座標</param>
+    /// <returns>登っていたら true</returns>
+    public bool IsFloorUp(Vector3Int pos)
+    {
+        int mData = GetMapData(pos.x, pos.y);
+        if(2 == mData)
+        {
+            _mapFloor++;
+            ReDrawMap();
+            return true;
+        }
+        return false;
+    }
+
+    /// <summary>
+    /// 階段を降りれるかのチェック、降りれるようなら降りる
+    /// </summary>
+    /// <param name="pos">現在の座標</param>
+    public void IsFloorDown(Vector3Int pos)
+    {
+        int mData = GetMapData(pos.x, pos.y);
+        if(3 == mData)
+        {
+            _mapFloor--;
+            ReDrawMap();
+        }
     }
     
 #endregion

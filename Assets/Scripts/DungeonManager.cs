@@ -60,6 +60,20 @@ public class DungeonManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        //  スペースキーを押す
+        if(Input.GetKeyDown(KeyCode.Space) && !_playerManager.IsWalking)
+        {
+            MapEventCheck();
+        }
+    }
+
+    /// <summary>
+    /// マップイベントのチェック
+    /// </summary>
+    private void MapEventCheck()
+    {
+        if(false == _mapManager.IsFloorUp(_playerManager.PlayerPos))
+            _mapManager.IsFloorDown(_playerManager.PlayerPos);
     }
 
     /// <summary>
