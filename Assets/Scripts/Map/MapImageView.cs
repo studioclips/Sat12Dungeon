@@ -5,20 +5,12 @@ using UnityEngine;
 using UnityEngine.UI;
 
 //  Image コンポーネントが存在しなければ強制的にオブジェクトにアタッチする命令
-[RequireComponent(typeof(Image))]
+// [RequireComponent(typeof(Image))]
 public class MapImageView : MonoBehaviour
 {
     //  マップとして表示するイメージ
+    [SerializeField]
     private Image _mapImage = null;
-
-    /// <summary>
-    /// オブジェクト生成と同時に呼び出される
-    /// </summary>
-    private void Awake()
-    {
-        //  このオブジェクトに張り付いているイメージを変数に割り当てる
-        _mapImage = GetComponent<Image>();
-    }
 
     /// <summary>
     /// マップいめじにスプライトを登録する

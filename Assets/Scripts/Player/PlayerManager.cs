@@ -37,6 +37,12 @@ public class PlayerManager : MonoBehaviour
     //  プレイヤーの移動状態を取得
     public bool IsWalking => _playerView.IsWalking;
 
+    //  プレイヤーの向きを取得
+    public PlayerAnimState PlayerDirection => _playerView.PlayerAnimState;
+
+    //  移動制御不可能フラグ
+    public bool IsDisableAction {get; set;} = false;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -49,10 +55,10 @@ public class PlayerManager : MonoBehaviour
     /// 移動終了検知コールバックを playerview に渡す
     /// </summary>
     /// <param name="walkEndCallback">コールバック関数</param>
-    // public void SetupWalkEndCallback(System.Action walkEndCallback)
-    // {
-    //     _playerView.SetupWalkEndCallback(walkEndCallback);
-    // }
+    public void SetupWalkEndCallback(System.Action walkEndCallback)
+    {
+        _playerView.SetupWalkEndCallback(walkEndCallback);
+    }
 
     /// <summary>
     /// 移動可能かどうかを取得する関数
@@ -66,6 +72,8 @@ public class PlayerManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        //  移動不可能フラグが立っていれば何もしない
+        if(IsDisableAction) return;
         //  関数が登録されていなければ何もしない
         if (null == _isMoveEnableFunc) return;
         //  移動中はキーを受け付けない
@@ -124,5 +132,17 @@ public class PlayerManager : MonoBehaviour
         }
         //  移動処理
         _playerView.WalingStart();
+    }
+
+    /// <summary>
+    /// プレイヤーの座標変更
+    /// </summary>
+    /// <param name="pos">変更する座標</param>
+    public void SetPlayerPos(Vector3Int pos)
+    {
+        //  予定外の場所であれば何もしない
+        if(Vector3Int.zero == pos) return;
+        _plyerPos = pos;
+        _playerView.transform.localPosition = _playerStartPos + (Vector3)(_plyerPos * _blockSize * _adjustPos);
     }
 }

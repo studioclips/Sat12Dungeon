@@ -36,8 +36,28 @@ public static class CommonParam
 
 #region キャラ関連パラメータ
 
-    
+#endregion
 
+#region メッセージ関連のパラメータ 
+    public enum MessageID
+    {
+        UpMessage = 0,
+        DownMessage = 1,
+        HoleMessage = 2,
+        KeyStart = 3,
+        GetKeyMessage = KeyStart,
+        OpenDoorMessage = 4,
+        NoKeyMessage = 5,
+        KeyEnd = NoKeyMessage,
+    }
+
+    public enum KeyNameID
+    {
+        Key1 = 0,
+        Key2 = 1,
+        Key3 = 2,
+        Key4 = 3
+    }
 #endregion
 
 }
